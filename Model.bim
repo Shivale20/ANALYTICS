@@ -35,7 +35,7 @@
             "sourceColumn": "DateKey"
           },
           {
-            "name": "FullDateAlternateKey",
+            "name": "Date",
             "dataType": "dateTime",
             "sourceColumn": "FullDateAlternateKey"
           },
@@ -48,16 +48,6 @@
             "name": "EnglishDayNameOfWeek",
             "dataType": "string",
             "sourceColumn": "EnglishDayNameOfWeek"
-          },
-          {
-            "name": "SpanishDayNameOfWeek",
-            "dataType": "string",
-            "sourceColumn": "SpanishDayNameOfWeek"
-          },
-          {
-            "name": "FrenchDayNameOfWeek",
-            "dataType": "string",
-            "sourceColumn": "FrenchDayNameOfWeek"
           },
           {
             "name": "DayNumberOfMonth",
@@ -78,16 +68,6 @@
             "name": "EnglishMonthName",
             "dataType": "string",
             "sourceColumn": "EnglishMonthName"
-          },
-          {
-            "name": "SpanishMonthName",
-            "dataType": "string",
-            "sourceColumn": "SpanishMonthName"
-          },
-          {
-            "name": "FrenchMonthName",
-            "dataType": "string",
-            "sourceColumn": "FrenchMonthName"
           },
           {
             "name": "MonthNumberOfYear",
@@ -123,6 +103,20 @@
             "name": "FiscalSemester",
             "dataType": "int64",
             "sourceColumn": "FiscalSemester"
+          },
+          {
+            "type": "calculated",
+            "name": "MonthCalendar",
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "expression": "RIGHT(\" \" & FORMAT(DimDate[MonthNumberOfYear],\"#0\"),2) &\" - \"&DimDate[EnglishMonthName]"
+          },
+          {
+            "type": "calculated",
+            "name": "DayOfWeek",
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "expression": "RIGHT(\" \" & FORMAT([DayNumberOfWeek],\"#0\"), 2) & \" - \" & [EnglishDayNameOfWeek]  "
           }
         ],
         "partitions": [
@@ -139,6 +133,68 @@
                 "    dbo_DimDate"
               ]
             }
+          }
+        ],
+        "measures": [
+          {
+            "name": "DayCurrentQuarterToDate",
+            "expression": " COUNTROWS( DATESQTD(DimDate[Date]))"
+          },
+          {
+            "name": "DaysInCurrentQuarter",
+            "expression": "COUNTROWS( DATESBETWEEN( DimDate[Date], STARTOFQUARTER(LASTDATE(DimDate[Date])), ENDOFQUARTER(DimDate[Date])))"
+          }
+        ],
+        "hierarchies": [
+          {
+            "name": "Calendar",
+            "levels": [
+              {
+                "name": "FiscalYear",
+                "ordinal": 0,
+                "column": "CalendarYear"
+              },
+              {
+                "name": "FiscalSemester",
+                "ordinal": 1,
+                "column": "CalendarSemester"
+              },
+              {
+                "name": "FiscalQuarter",
+                "ordinal": 2,
+                "column": "CalendarQuarter"
+              },
+              {
+                "name": "MonthCalendar",
+                "ordinal": 3,
+                "column": "MonthCalendar"
+              },
+              {
+                "name": "DayNumberOfMonth",
+                "ordinal": 4,
+                "column": "DayNumberOfMonth"
+              }
+            ]
+          },
+          {
+            "name": "ProductionCalendar",
+            "levels": [
+              {
+                "name": "CalendarYear",
+                "ordinal": 0,
+                "column": "CalendarYear"
+              },
+              {
+                "name": "WeekNumberOfYear",
+                "ordinal": 1,
+                "column": "WeekNumberOfYear"
+              },
+              {
+                "name": "DayNumberOfWeek",
+                "ordinal": 2,
+                "column": "DayNumberOfWeek"
+              }
+            ]
           }
         ]
       },
@@ -174,16 +230,6 @@
             "name": "EnglishProductName",
             "dataType": "string",
             "sourceColumn": "EnglishProductName"
-          },
-          {
-            "name": "SpanishProductName",
-            "dataType": "string",
-            "sourceColumn": "SpanishProductName"
-          },
-          {
-            "name": "FrenchProductName",
-            "dataType": "string",
-            "sourceColumn": "FrenchProductName"
           },
           {
             "name": "StandardCost",
@@ -266,46 +312,6 @@
             "sourceColumn": "EnglishDescription"
           },
           {
-            "name": "FrenchDescription",
-            "dataType": "string",
-            "sourceColumn": "FrenchDescription"
-          },
-          {
-            "name": "ChineseDescription",
-            "dataType": "string",
-            "sourceColumn": "ChineseDescription"
-          },
-          {
-            "name": "ArabicDescription",
-            "dataType": "string",
-            "sourceColumn": "ArabicDescription"
-          },
-          {
-            "name": "HebrewDescription",
-            "dataType": "string",
-            "sourceColumn": "HebrewDescription"
-          },
-          {
-            "name": "ThaiDescription",
-            "dataType": "string",
-            "sourceColumn": "ThaiDescription"
-          },
-          {
-            "name": "GermanDescription",
-            "dataType": "string",
-            "sourceColumn": "GermanDescription"
-          },
-          {
-            "name": "JapaneseDescription",
-            "dataType": "string",
-            "sourceColumn": "JapaneseDescription"
-          },
-          {
-            "name": "TurkishDescription",
-            "dataType": "string",
-            "sourceColumn": "TurkishDescription"
-          },
-          {
             "name": "StartDate",
             "dataType": "dateTime",
             "sourceColumn": "StartDate"
@@ -319,6 +325,20 @@
             "name": "Status",
             "dataType": "string",
             "sourceColumn": "Status"
+          },
+          {
+            "type": "calculated",
+            "name": "ProductSubcategoryName",
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "expression": "RELATED('DimProductSubcategory'[EnglishProductSubcategoryName])  "
+          },
+          {
+            "type": "calculated",
+            "name": "ProductCategoryName",
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "expression": "RELATED('DimProductCategory'[EnglishProductCategoryName]) "
           }
         ],
         "partitions": [
@@ -335,6 +355,33 @@
                 "    dbo_DimProduct"
               ]
             }
+          }
+        ],
+        "hierarchies": [
+          {
+            "name": "Category",
+            "levels": [
+              {
+                "name": "Category",
+                "ordinal": 0,
+                "column": "ProductCategoryName"
+              },
+              {
+                "name": "SubCategory",
+                "ordinal": 1,
+                "column": "ProductSubcategoryName"
+              },
+              {
+                "name": "Model",
+                "ordinal": 2,
+                "column": "ModelName"
+              },
+              {
+                "name": "Product",
+                "ordinal": 3,
+                "column": "EnglishProductName"
+              }
+            ]
           }
         ]
       },
@@ -733,6 +780,20 @@
             "name": "ShipDate",
             "dataType": "dateTime",
             "sourceColumn": "ShipDate"
+          },
+          {
+            "type": "calculated",
+            "name": "Margin",
+            "dataType": "decimal",
+            "isDataTypeInferred": true,
+            "expression": "FactInternetSales[SalesAmount] - FactInternetSales[TotalProductCost]",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "annotations": [
+              {
+                "name": "Format",
+                "value": "<Format Format=\"Currency\" Accuracy=\"2\" ThousandSeparator=\"True\"><Currency LCID=\"1033\" DisplayName=\"$ English (United States)\" Symbol=\"$\" PositivePattern=\"0\" NegativePattern=\"0\" /></Format>"
+              }
+            ]
           }
         ],
         "partitions": [
@@ -747,6 +808,154 @@
                 "    dbo_FactInternetSales = Source{[Schema=\"dbo\",Item=\"FactInternetSales\"]}[Data]",
                 "in",
                 "    dbo_FactInternetSales"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "InternetDistinctCountSalesOrder",
+            "expression": "DISTINCTCOUNT(FactInternetSales[SalesOrderNumber])"
+          },
+          {
+            "name": "InternetOrderLinesCount",
+            "expression": "COUNTA([SalesOrderLineNumber])"
+          },
+          {
+            "name": "InternetTotalUnits",
+            "expression": "SUM([OrderQuantity])"
+          },
+          {
+            "name": "InternetTotalDiscountAmount",
+            "expression": "SUM([DiscountAmount])"
+          },
+          {
+            "name": "InternetTotalProductCost",
+            "expression": "SUM([TotalProductCost])"
+          },
+          {
+            "name": "InternetTotalSales",
+            "expression": "SUM([SalesAmount])"
+          },
+          {
+            "name": "InternetTotalMargin",
+            "expression": "SUM([Margin])"
+          },
+          {
+            "name": "InternetTotalTaxAmt",
+            "expression": "SUM([TaxAmt])"
+          },
+          {
+            "name": "InternetPreviousQuarterMargin",
+            "expression": "CALCULATE([InternetTotalMargin],PREVIOUSQUARTER(DimDate[Date]))"
+          },
+          {
+            "name": "InternetCurrentQuarterMargin",
+            "expression": "TOTALQTD([InternetTotalMargin],'DimDate'[Date])"
+          },
+          {
+            "name": "InternetPreviousQuarterSales",
+            "expression": "CALCULATE([InternetTotalSales],PREVIOUSQUARTER('DimDate'[Date]))"
+          },
+          {
+            "name": "InternetCurrentQuarterSales",
+            "expression": "TOTALQTD([InternetTotalSales],'DimDate'[Date])"
+          },
+          {
+            "name": "InternetPreviousQuarterSalesProportionToQTD",
+            "expression": "[InternetPreviousQuarterSales]*([DayCurrentQuarterToDate]/[DaysInCurrentQuarter])"
+          },
+          {
+            "name": "InternetCurrentQuarterSalesPerformance",
+            "expression": "IF([InternetPreviousQuarterSalesProportionToQTD]<>0,([InternetCurrentQuarterSales]-[InternetPreviousQuarterSalesProportionToQTD])/[InternetPreviousQuarterSalesProportionToQTD],BLANK())",
+            "kpi": {
+              "targetExpression": "1.1",
+              "statusGraphic": "Shapes",
+              "statusExpression": [
+                "var x='FactInternetSales'[InternetCurrentQuarterSalesPerformance] return",
+                "            if(ISBLANK(x),BLANK(),",
+                "                    If(x<1,-1,",
+                "\t                If(x<1.07,0,1)",
+                "                )",
+                "            )",
+                "            "
+              ],
+              "annotations": [
+                {
+                  "name": "GoalType",
+                  "value": "StaticValue"
+                },
+                {
+                  "name": "KpiStatusType",
+                  "value": "Linear"
+                },
+                {
+                  "name": "KpiThresholdType",
+                  "value": "Absolute"
+                },
+                {
+                  "name": "KpiThresholdOrdering",
+                  "value": "Ascending"
+                },
+                {
+                  "name": "KpiThresholdCount",
+                  "value": "2"
+                },
+                {
+                  "name": "KpiThreshold_0",
+                  "value": "1"
+                },
+                {
+                  "name": "KpiThreshold_1",
+                  "value": "1.07"
+                }
+              ]
+            }
+          },
+          {
+            "name": "InternetCurrentQuarterMarginPerformance",
+            "expression": "IF([InternetPreviousQuarterSalesProportionToQTD]<>0,([InternetCurrentQuarterMargin]-[InternetPreviousQuarterSalesProportionToQTD])/[InternetPreviousQuarterSalesProportionToQTD],BLANK())",
+            "kpi": {
+              "targetExpression": "1.25",
+              "statusGraphic": "Shapes",
+              "statusExpression": [
+                "var x='FactInternetSales'[InternetCurrentQuarterMarginPerformance] return",
+                "            if(ISBLANK(x),BLANK(),",
+                "                    If(x<0.8,-1,",
+                "\t                If(x<1.03,0,1)",
+                "                )",
+                "            )",
+                "            "
+              ],
+              "annotations": [
+                {
+                  "name": "GoalType",
+                  "value": "StaticValue"
+                },
+                {
+                  "name": "KpiStatusType",
+                  "value": "Linear"
+                },
+                {
+                  "name": "KpiThresholdType",
+                  "value": "Absolute"
+                },
+                {
+                  "name": "KpiThresholdOrdering",
+                  "value": "Ascending"
+                },
+                {
+                  "name": "KpiThresholdCount",
+                  "value": "2"
+                },
+                {
+                  "name": "KpiThreshold_0",
+                  "value": "0.8"
+                },
+                {
+                  "name": "KpiThreshold_1",
+                  "value": "1.03"
+                }
               ]
             }
           }
@@ -804,6 +1013,339 @@
         "fromColumn": "CustomerKey",
         "toTable": "DimCustomer",
         "toColumn": "CustomerKey"
+      }
+    ],
+    "perspectives": [
+      {
+        "name": "InternetSales",
+        "tables": [
+          {
+            "name": "DimDate",
+            "columns": [
+              {
+                "name": "CalendarQuarter"
+              },
+              {
+                "name": "CalendarSemester"
+              },
+              {
+                "name": "CalendarYear"
+              },
+              {
+                "name": "Date"
+              },
+              {
+                "name": "DateKey"
+              },
+              {
+                "name": "DayNumberOfMonth"
+              },
+              {
+                "name": "DayNumberOfWeek"
+              },
+              {
+                "name": "DayNumberOfYear"
+              },
+              {
+                "name": "DayOfWeek"
+              },
+              {
+                "name": "EnglishDayNameOfWeek"
+              },
+              {
+                "name": "EnglishMonthName"
+              },
+              {
+                "name": "FiscalQuarter"
+              },
+              {
+                "name": "FiscalSemester"
+              },
+              {
+                "name": "FiscalYear"
+              },
+              {
+                "name": "MonthCalendar"
+              },
+              {
+                "name": "MonthNumberOfYear"
+              },
+              {
+                "name": "WeekNumberOfYear"
+              }
+            ],
+            "measures": [
+              {
+                "name": "DayCurrentQuarterToDate"
+              },
+              {
+                "name": "DaysInCurrentQuarter"
+              }
+            ]
+          },
+          {
+            "name": "DimProduct",
+            "columns": [
+              {
+                "name": "Class"
+              },
+              {
+                "name": "Color"
+              },
+              {
+                "name": "DaysToManufacture"
+              },
+              {
+                "name": "DealerPrice"
+              },
+              {
+                "name": "EndDate"
+              },
+              {
+                "name": "EnglishDescription"
+              },
+              {
+                "name": "EnglishProductName"
+              },
+              {
+                "name": "FinishedGoodsFlag"
+              },
+              {
+                "name": "ListPrice"
+              },
+              {
+                "name": "ModelName"
+              },
+              {
+                "name": "ProductAlternateKey"
+              },
+              {
+                "name": "ProductCategoryName"
+              },
+              {
+                "name": "ProductKey"
+              },
+              {
+                "name": "ProductLine"
+              },
+              {
+                "name": "ProductSubcategoryKey"
+              },
+              {
+                "name": "ProductSubcategoryName"
+              },
+              {
+                "name": "ReorderPoint"
+              },
+              {
+                "name": "SafetyStockLevel"
+              },
+              {
+                "name": "Size"
+              },
+              {
+                "name": "SizeRange"
+              },
+              {
+                "name": "SizeUnitMeasureCode"
+              },
+              {
+                "name": "StandardCost"
+              },
+              {
+                "name": "StartDate"
+              },
+              {
+                "name": "Status"
+              },
+              {
+                "name": "Style"
+              },
+              {
+                "name": "Weight"
+              },
+              {
+                "name": "WeightUnitMeasureCode"
+              }
+            ]
+          },
+          {
+            "name": "DimProductCategory",
+            "columns": [
+              {
+                "name": "EnglishProductCategoryName"
+              },
+              {
+                "name": "FrenchProductCategoryName"
+              },
+              {
+                "name": "ProductCategoryAlternateKey"
+              },
+              {
+                "name": "ProductCategoryKey"
+              },
+              {
+                "name": "SpanishProductCategoryName"
+              }
+            ]
+          },
+          {
+            "name": "DimProductSubcategory",
+            "columns": [
+              {
+                "name": "EnglishProductSubcategoryName"
+              },
+              {
+                "name": "FrenchProductSubcategoryName"
+              },
+              {
+                "name": "ProductCategoryKey"
+              },
+              {
+                "name": "ProductSubcategoryAlternateKey"
+              },
+              {
+                "name": "ProductSubcategoryKey"
+              },
+              {
+                "name": "SpanishProductSubcategoryName"
+              }
+            ]
+          },
+          {
+            "name": "FactInternetSales",
+            "columns": [
+              {
+                "name": "CarrierTrackingNumber"
+              },
+              {
+                "name": "CurrencyKey"
+              },
+              {
+                "name": "CustomerKey"
+              },
+              {
+                "name": "CustomerPONumber"
+              },
+              {
+                "name": "DiscountAmount"
+              },
+              {
+                "name": "DueDate"
+              },
+              {
+                "name": "DueDateKey"
+              },
+              {
+                "name": "ExtendedAmount"
+              },
+              {
+                "name": "Freight"
+              },
+              {
+                "name": "Margin"
+              },
+              {
+                "name": "OrderDate"
+              },
+              {
+                "name": "OrderDateKey"
+              },
+              {
+                "name": "OrderQuantity"
+              },
+              {
+                "name": "ProductKey"
+              },
+              {
+                "name": "ProductStandardCost"
+              },
+              {
+                "name": "PromotionKey"
+              },
+              {
+                "name": "RevisionNumber"
+              },
+              {
+                "name": "SalesAmount"
+              },
+              {
+                "name": "SalesOrderLineNumber"
+              },
+              {
+                "name": "SalesOrderNumber"
+              },
+              {
+                "name": "SalesTerritoryKey"
+              },
+              {
+                "name": "ShipDate"
+              },
+              {
+                "name": "ShipDateKey"
+              },
+              {
+                "name": "TaxAmt"
+              },
+              {
+                "name": "TotalProductCost"
+              },
+              {
+                "name": "UnitPrice"
+              },
+              {
+                "name": "UnitPriceDiscountPct"
+              }
+            ],
+            "measures": [
+              {
+                "name": "InternetCurrentQuarterMargin"
+              },
+              {
+                "name": "InternetCurrentQuarterSales"
+              },
+              {
+                "name": "InternetDistinctCountSalesOrder"
+              },
+              {
+                "name": "InternetOrderLinesCount"
+              },
+              {
+                "name": "InternetPreviousQuarterMargin"
+              },
+              {
+                "name": "InternetPreviousQuarterSales"
+              },
+              {
+                "name": "InternetPreviousQuarterSalesProportionToQTD"
+              },
+              {
+                "name": "InternetTotalDiscountAmount"
+              },
+              {
+                "name": "InternetTotalMargin"
+              },
+              {
+                "name": "InternetTotalProductCost"
+              },
+              {
+                "name": "InternetTotalSales"
+              },
+              {
+                "name": "InternetTotalTaxAmt"
+              },
+              {
+                "name": "InternetTotalUnits"
+              },
+              {
+                "name": "InternetCurrentQuarterMarginPerformance"
+              },
+              {
+                "name": "InternetCurrentQuarterSalesPerformance"
+              }
+            ]
+          }
+        ]
       }
     ],
     "annotations": [
